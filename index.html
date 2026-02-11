@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Invisible Hand: Economics Master</title>
+  <style>
+    :root {
+      --bg: #11151c;
+      --panel: #1a2230;
+      --panel-2: #222c3d;
+      --text: #e6f7ff;
+      --muted: #9ab4c7;
+      --neon: #34d6ff;
+      --neon-2: #00ffb3;
+      --danger: #ff5f7a;
+      --warn: #ffd166;
+      --good: #46f2a9;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top right, #1a2230 0%, var(--bg) 50%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      width: min(1100px, 94vw);
+      margin: 24px auto 40px;
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), #151d29);
+      border: 1px solid #2b3b52;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.35rem, 2vw, 2rem);
+      color: var(--neon);
+      letter-spacing: 0.3px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .topbar {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .score-wrap {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: #101722;
+      border: 1px solid #2b3b52;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.92rem;
+    }
+
+    .pill strong { color: var(--neon-2); }
+
+    .mode {
+      color: var(--neon-2);
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .scenario {
+      background: rgba(9, 13, 19, 0.6);
+      border-left: 3px solid var(--neon);
+      border-radius: 10px;
+      padding: 12px;
+      line-height: 1.45;
+      color: #d8e8f4;
+      margin-bottom: 14px;
+    }
+
+    .question {
+      font-size: 1.08rem;
+      margin: 10px 0 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.93rem;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th, td {
+      border: 1px solid #31445f;
+      padding: 8px 10px;
+      text-align: center;
+    }
+
+    th { background: #102238; color: #8be6ff; }
+    td { background: #1b2738; }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      min-width: 130px;
+      border: 1px solid #34506d;
+      border-radius: 10px;
+      background: #0f1724;
+      color: var(--text);
+      padding: 10px;
+      font-size: 1rem;
+    }
+
+    button {
+      border: 1px solid #2d4d69;
+      background: linear-gradient(180deg, #13324a, #0f2538);
+      color: #ccefff;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.12s ease, border-color 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); border-color: var(--neon); }
+    button:active { transform: translateY(1px); }
+
+    .choice-btn { min-width: 160px; }
+
+    .feedback {
+      margin-top: 12px;
+      border-radius: 10px;
+      padding: 12px;
+      display: none;
+      line-height: 1.45;
+      border: 1px solid #35516b;
+      background: #0d1d2d;
+    }
+
+    .feedback.good { border-color: #22684f; background: #102a20; color: #c4ffe5; }
+    .feedback.bad { border-color: #763149; background: #2a1220; color: #ffd2de; }
+
+    .rule {
+      color: var(--warn);
+      font-size: 0.88rem;
+      margin-top: 6px;
+    }
+
+    .side h3 {
+      margin: 0 0 10px;
+      color: var(--neon);
+      font-size: 1.03rem;
+    }
+
+    .chart-row {
+      margin: 8px 0;
+    }
+
+    .chart-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bar-track {
+      height: 12px;
+      background: #0f1724;
+      border: 1px solid #2b3e57;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #39e6ff, #17ff9e);
+      transition: width 0.35s ease;
+    }
+
+    .tiny {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    #sdGraph {
+      width: 100%;
+      background: #0d1624;
+      border: 1px solid #2c425c;
+      border-radius: 10px;
+      margin: 10px 0 2px;
+      height: auto;
+      aspect-ratio: 1.5;
+    }
+
+    .next-btn {
+      margin-top: 12px;
+      background: linear-gradient(180deg, #124a41, #0e332d);
+      border-color: #2f8f7f;
+    }
+
+    @media (max-width: 880px) {
+      .app { grid-template-columns: 1fr; }
+      .choice-btn { flex: 1 1 45%; min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="card topbar">
+      <div>
+        <h1>The Invisible Hand: Economics Master</h1>
+        <div class="subtitle">You are an Economic Consultant. Diagnose the market, maximize Utility.</div>
+      </div>
+      <div class="score-wrap">
+        <div class="pill">Utility: <strong id="score">0</strong></div>
+        <div class="pill">Streak: <strong id="streak">0</strong></div>
+        <div class="pill">Multiplier: <strong id="multiplier">x1</strong></div>
+      </div>
+    </section>
+
+    <section class="card" id="gameCard">
+      <div class="mode" id="modeName">Loading mission...</div>
+      <div class="scenario" id="scenario"></div>
+      <div id="dynamicArea"></div>
+      <div class="feedback" id="feedback"></div>
+      <button id="nextBtn" class="next-btn" style="display:none">Next Scenario ▶</button>
+    </section>
+
+    <aside class="card side">
+      <h3>Accuracy by Category</h3>
+      <div id="chart"></div>
+      <div class="tiny">
+        Midterm reminders:
+        <ul>
+          <li><b>Price change</b> = movement along demand (<i>change in quantity demanded</i>).</li>
+          <li><b>Demand shifter</b> = entire demand curve shifts.</li>
+          <li>For price elasticity, use <b>|E<sub>d</sub>|</b>. Income and cross-price elasticities keep signs.</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const state = {
+      score: 0,
+      streak: 0,
+      multiplier: 1,
+      active: null,
+      categoryStats: {
+        PPC: { correct: 0, total: 0 },
+        'S&D': { correct: 0, total: 0 },
+        Elasticity: { correct: 0, total: 0 }
+      }
+    };
+
+    const modeName = document.getElementById('modeName');
+    const scenarioEl = document.getElementById('scenario');
+    const dynamicArea = document.getElementById('dynamicArea');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+
+    const rInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    function updateScoreboard() {
+      document.getElementById('score').textContent = state.score;
+      document.getElementById('streak').textContent = state.streak;
+      document.getElementById('multiplier').textContent = `x${state.multiplier}`;
+    }
+
+    function renderChart() {
+      const chart = document.getElementById('chart');
+      chart.innerHTML = '';
+      Object.entries(state.categoryStats).forEach(([name, data]) => {
+        const pct = data.total ? Math.round((data.correct / data.total) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+        row.innerHTML = `
+          <div class="chart-label"><span>${name}</span><span>${data.correct}/${data.total} (${pct}%)</span></div>
+          <div class="bar-track"><div class="bar" style="width:${pct}%"></div></div>
+        `;
+        chart.appendChild(row);
+      });
+    }
+
+    function setFeedback(isCorrect, text, rule) {
+      feedbackEl.style.display = 'block';
+      feedbackEl.className = `feedback ${isCorrect ? 'good' : 'bad'}`;
+      feedbackEl.innerHTML = `<strong>${isCorrect ? 'Correct!' : 'Not quite.'}</strong> ${text}<div class="rule">Rule: ${rule}</div>`;
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function settleAnswer(correct, category, explanation, rule) {
+      state.categoryStats[category].total += 1;
+      if (correct) {
+        state.categoryStats[category].correct += 1;
+        state.streak += 1;
+        state.multiplier = Math.min(5, 1 + Math.floor(state.streak / 2));
+        const points = 10 * state.multiplier;
+        state.score += points;
+        setFeedback(true, `${explanation} (+${points} Utility)`, rule);
+      } else {
+        state.streak = 0;
+        state.multiplier = 1;
+        setFeedback(false, explanation, rule);
+      }
+      updateScoreboard();
+      renderChart();
+      disableInputs();
+    }
+
+    function disableInputs() {
+      dynamicArea.querySelectorAll('button, input').forEach(el => el.disabled = true);
+    }
+
+    function loadNextMode() {
+      feedbackEl.style.display = 'none';
+      feedbackEl.className = 'feedback';
+      nextBtn.style.display = 'none';
+      dynamicArea.innerHTML = '';
+
+      const modeFn = pick([buildPPCMode, buildSupplyDemandMode, buildElasticityMode]);
+      state.active = modeFn();
+    }
+
+    // MODE 1: Opportunity Cost Calculator
+    function buildPPCMode() {
+      modeName.textContent = 'Mode: The Opportunity Cost Calculator';
+      const countryA = pick(['Mexico', 'Nigeria', 'Vietnam', 'Canada']);
+      let countryB = pick(['Brazil', 'Kenya', 'Japan', 'India']);
+      if (countryB === countryA) countryB = 'Chile';
+      const goods = pick([
+        ['Shoes', 'Glasses'], ['Wheat', 'Steel'], ['Phones', 'Textbooks'], ['Coffee', 'Tea']
+      ]);
+
+      const structure = pick(['constant', 'increasing']);
+      let htmlTable = '';
+      let question = '';
+      let correctAnswer;
+      let rule;
+      let expl;
+
+      if (structure === 'constant') {
+        const a1 = rInt(20, 80), a2 = rInt(20, 80);
+        const b1 = rInt(20, 80), b2 = rInt(20, 80);
+        htmlTable = `
+          <table>
+            <tr><th>Country</th><th>Max ${goods[0]}</th><th>Max ${goods[1]}</th></tr>
+            <tr><td>${countryA}</td><td>${a1}</td><td>${a2}</td></tr>
+            <tr><td>${countryB}</td><td>${b1}</td><td>${b2}</td></tr>
+          </table>`;
+
+        const askCountry = Math.random() > 0.5 ? { n: countryA, x: a1, y: a2 } : { n: countryB, x: b1, y: b2 };
+        const askGood = Math.random() > 0.5 ? goods[0] : goods[1];
+
+        if (askGood === goods[0]) {
+          correctAnswer = askCountry.y / askCountry.x;
+          question = `Using <b>Give Up / Get</b>, what is the opportunity cost of <b>1 ${goods[0]}</b> in <b>${askCountry.n}</b>? (in units of ${goods[1]})`;
+          expl = `At constant costs (linear PPC), OC(1 ${goods[0]}) = ${askCountry.y}/${askCountry.x} = ${correctAnswer.toFixed(2)} ${goods[1]}.`;
+        } else {
+          correctAnswer = askCountry.x / askCountry.y;
+          question = `Using <b>Give Up / Get</b>, what is the opportunity cost of <b>1 ${goods[1]}</b> in <b>${askCountry.n}</b>? (in units of ${goods[0]})`;
+          expl = `At constant costs (linear PPC), OC(1 ${goods[1]}) = ${askCountry.x}/${askCountry.y} = ${correctAnswer.toFixed(2)} ${goods[0]}.`;
+        }
+        rule = 'Constant costs produce a straight-line PPC: opportunity cost is constant at every point.';
+      } else {
+        const x1 = rInt(20, 40), x2 = rInt(45, 70);
+        const y0 = rInt(70, 100), y1 = y0 - rInt(10, 20), y2 = y1 - rInt(16, 28);
+        const z1 = rInt(18, 35), z2 = rInt(40, 65);
+        const w0 = rInt(65, 95), w1 = w0 - rInt(8, 18), w2 = w1 - rInt(14, 26);
+
+        htmlTable = `
+          <table>
+            <tr><th colspan="4">${countryA} PPC (${goods[0]}, ${goods[1]})</th></tr>
+            <tr><th>Point</th><th>A</th><th>B</th><th>C</th></tr>
+            <tr><td>${goods[0]}</td><td>0</td><td>${x1}</td><td>${x2}</td></tr>
+            <tr><td>${goods[1]}</td><td>${y0}</td><td>${y1}</td><td>${y2}</td></tr>
+          </table>
+          <table>
+            <tr><th colspan="4">${countryB} PPC (${goods[0]}, ${goods[1]})</th></tr>
+            <tr><th>Point</th><th>A</th><th>B</th><th>C</th></tr>
+            <tr><td>${goods[0]}</td><td>0</td><td>${z1}</td><td>${z2}</td></tr>
+            <tr><td>${goods[1]}</td><td>${w0}</td><td>${w1}</td><td>${w2}</td></tr>
+          </table>`;
+
+        const useA = Math.random() > 0.5;
+        const c = useA ? { n: countryA, x1, x2, y0, y1, y2 } : { n: countryB, x1: z1, x2: z2, y0: w0, y1: w1, y2: w2 };
+        const deltaX = c.x2 - c.x1;
+        const deltaY = c.y1 - c.y2;
+        correctAnswer = deltaY / deltaX;
+        question = `In <b>${c.n}</b>, when moving from point B to C, what is the opportunity cost of 1 additional <b>${goods[0]}</b> (in ${goods[1]})?`;
+        expl = `From B→C, you give up ${deltaY} ${goods[1]} to get ${deltaX} ${goods[0]}: OC = ${deltaY}/${deltaX} = ${correctAnswer.toFixed(2)}.`;
+        rule = 'Increasing costs (bowed-out PPC) come from specialized resources, so marginal opportunity cost rises as you produce more of one good.';
+      }
+
+      scenarioEl.innerHTML = `Two countries allocate resources between two goods. Identify the true opportunity cost.`;
+      dynamicArea.innerHTML = `${htmlTable}
+        <div class="question">${question}</div>
+        <div class="controls">
+          <input id="numAnswer" type="number" step="0.01" placeholder="Enter numeric answer" />
+          <button id="submitNum">Submit</button>
+        </div>`;
+
+      document.getElementById('submitNum').onclick = () => {
+        const raw = parseFloat(document.getElementById('numAnswer').value);
+        if (Number.isNaN(raw)) return;
+        const ok = Math.abs(raw - correctAnswer) <= 0.12;
+        settleAnswer(ok, 'PPC', ok ? expl : `${expl} Your answer: ${raw.toFixed(2)}.`, rule);
+      };
+    }
+
+    // MODE 2: Supply & Demand
+    function buildSupplyDemandMode() {
+      modeName.textContent = 'Mode: The Market Shifter (Supply & Demand)';
+      const events = [
+        {
+          text: 'A new irrigation technology drastically improves corn farm productivity.',
+          correct: 'SR',
+          why: 'Technology lowers production costs and increases output at every price.',
+          rule: 'Non-price production shifters move Supply; better technology shifts Supply Right.'
+        },
+        {
+          text: 'Consumer income rises, and instant noodles are an inferior good.',
+          correct: 'DL',
+          why: 'When income rises, demand for inferior goods falls.',
+          rule: 'Income is a demand shifter. For inferior goods, higher income shifts Demand Left.'
+        },
+        {
+          text: 'A health study makes oat milk suddenly trendy.',
+          correct: 'DR',
+          why: 'Preferences increased, so consumers demand more at every price.',
+          rule: 'Taste/preference changes shift Demand, not quantity demanded.'
+        },
+        {
+          text: 'A key raw material gets more expensive for smartphone producers.',
+          correct: 'SL',
+          why: 'Higher input costs reduce supply at each price.',
+          rule: 'Input prices are supply shifters; higher costs shift Supply Left.'
+        },
+        {
+          text: 'The price of movie tickets rises for the same movie market.',
+          correct: 'TRICK',
+          why: 'This is a change in quantity demanded (movement along demand), not a curve shift.',
+          rule: 'Price changes DO NOT shift demand. They cause movement along the same demand curve.'
+        }
+      ];
+
+      const e = pick(events);
+      scenarioEl.innerHTML = `<b>Event:</b> ${e.text}`;
+
+      dynamicArea.innerHTML = `
+        <svg id="sdGraph" viewBox="0 0 320 220" aria-label="Supply and Demand graph">
+          <line x1="40" y1="15" x2="40" y2="190" stroke="#9cc0d8" stroke-width="2" />
+          <line x1="30" y1="180" x2="305" y2="180" stroke="#9cc0d8" stroke-width="2" />
+          <text x="10" y="24" fill="#9ab4c7" font-size="10">P</text>
+          <text x="300" y="202" fill="#9ab4c7" font-size="10">Q</text>
+          <line id="d0" x1="60" y1="45" x2="260" y2="170" stroke="#34d6ff" stroke-width="3" />
+          <line id="s0" x1="70" y1="170" x2="245" y2="45" stroke="#00ffb3" stroke-width="3" />
+          <text x="58" y="41" fill="#34d6ff" font-size="10">D</text>
+          <text x="246" y="41" fill="#00ffb3" font-size="10">S</text>
+        </svg>
+        <div class="question">Which curve shifts?</div>
+        <div class="controls">
+          <button class="choice-btn" data-choice="DL">Demand Shift Left</button>
+          <button class="choice-btn" data-choice="DR">Demand Shift Right</button>
+          <button class="choice-btn" data-choice="SL">Supply Shift Left</button>
+          <button class="choice-btn" data-choice="SR">Supply Shift Right</button>
+        </div>`;
+
+      dynamicArea.querySelectorAll('[data-choice]').forEach(btn => {
+        btn.onclick = () => {
+          const choice = btn.getAttribute('data-choice');
+          const correct = choice === e.correct;
+          if (e.correct === 'TRICK') {
+            settleAnswer(false, 'S&D', `${e.why} No shift button is correct here.`, e.rule);
+            return;
+          }
+          if (correct) animateShift(e.correct);
+          settleAnswer(correct, 'S&D', correct ? e.why : `You selected ${btn.textContent}. ${e.why}`, e.rule);
+        };
+      });
+    }
+
+    function animateShift(code) {
+      const d = document.getElementById('d0');
+      const s = document.getElementById('s0');
+      if (!d || !s) return;
+      const shift = {
+        DL: { target: d, dx: -22 }, DR: { target: d, dx: 22 },
+        SL: { target: s, dx: -22 }, SR: { target: s, dx: 22 }
+      }[code];
+      if (!shift) return;
+
+      let frame = 0;
+      const total = 18;
+      const x1 = +shift.target.getAttribute('x1');
+      const x2 = +shift.target.getAttribute('x2');
+      const step = shift.dx / total;
+      const id = setInterval(() => {
+        frame++;
+        shift.target.setAttribute('x1', (x1 + step * frame).toFixed(2));
+        shift.target.setAttribute('x2', (x2 + step * frame).toFixed(2));
+        if (frame >= total) clearInterval(id);
+      }, 16);
+    }
+
+    // MODE 3: Elasticity Executive
+    function buildElasticityMode() {
+      modeName.textContent = 'Mode: The Elasticity Executive';
+      const goods = pick(['pizza', 'textbooks', 'coffee', 'rideshare trips']);
+      const ed = pick([0.4, 0.6, 0.8, 1.2, 1.5, 2.0, 1.0]);
+      const type = ed === 1 ? 'unit elastic' : ed < 1 ? 'inelastic' : 'elastic';
+      const promptGoal = pick(['increase', 'decrease']);
+
+      scenarioEl.innerHTML = `You run a <b>${goods}</b> business. Demand has <b>|E<sub>d</sub>| = ${ed}</b> (${type}). You want to <b>${promptGoal}</b> Total Revenue.`;
+      dynamicArea.innerHTML = `
+        <div class="question">Should you raise price or lower price?</div>
+        <div class="controls">
+          <button id="raiseBtn" class="choice-btn">Raise Price</button>
+          <button id="lowerBtn" class="choice-btn">Lower Price</button>
+        </div>
+        <div class="tiny">Use absolute value for price elasticity. (Income and cross-price elasticities keep signs.)</div>`;
+
+      const answer = (() => {
+        if (ed === 1) return 'Neither';
+        if (promptGoal === 'increase') return ed < 1 ? 'Raise' : 'Lower';
+        return ed < 1 ? 'Lower' : 'Raise';
+      })();
+
+      function handle(choice) {
+        const correct = answer !== 'Neither' && choice === answer;
+        let explanation;
+        if (answer === 'Neither') {
+          explanation = 'At unit elasticity, changing price leaves Total Revenue approximately unchanged, so neither direction improves TR.';
+          settleAnswer(false, 'Elasticity', explanation, 'Total Revenue Test: |Ed| = 1 implies TR is maximized and relatively unchanged with small price changes.');
+          return;
+        }
+
+        explanation = `With |E_d| = ${ed} (${type}), price and TR move ${ed < 1 ? 'in the same direction' : 'in opposite directions'}.`;
+        settleAnswer(correct, 'Elasticity', correct ? explanation : `${explanation} Better choice: ${answer} Price.`, 'TR Test: Inelastic (<1) => P and TR same direction. Elastic (>1) => opposite directions.');
+      }
+
+      document.getElementById('raiseBtn').onclick = () => handle('Raise');
+      document.getElementById('lowerBtn').onclick = () => handle('Lower');
+    }
+
+    nextBtn.onclick = loadNextMode;
+    renderChart();
+    updateScoreboard();
+    loadNextMode();
+  </script>
+</body>
+</html>
