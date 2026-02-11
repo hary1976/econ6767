@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Invisible Hand: Economics Master</title>
+  <style>
+    :root {
+      --bg: #090f18;
+      --bg-2: #0f1725;
+      --panel: #141f31;
+      --panel-2: #18263b;
+      --text: #e8f6ff;
+      --muted: #95aec4;
+      --line: #28425f;
+      --cyan: #3ad8ff;
+      --green: #19f0a8;
+      --yellow: #ffd166;
+      --red: #ff6f8f;
+      --shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 400px at 110% -10%, #1c3557 0%, transparent 45%),
+        radial-gradient(900px 350px at -10% 0%, #15344d 0%, transparent 45%),
+        linear-gradient(180deg, var(--bg-2), var(--bg));
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1180px, 94vw);
+      margin: 22px auto 34px;
+      display: grid;
+      grid-template-columns: 2.3fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(20, 31, 49, 0.95), rgba(12, 20, 33, 0.96));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--cyan);
+      font-size: clamp(1.45rem, 2.4vw, 2.2rem);
+    }
+
+    .subtitle { color: var(--muted); margin-top: 6px; }
+    .badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+    .badge {
+      border: 1px solid var(--line);
+      background: #0c1524;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: .93rem;
+      color: #d8efff;
+    }
+
+    .badge strong { color: var(--green); }
+
+    .timer-wrap {
+      grid-column: 1 / -1;
+      margin-top: 2px;
+    }
+
+    .timer-head { display: flex; justify-content: space-between; font-size: .86rem; color: var(--muted); }
+    .timer-track {
+      margin-top: 5px;
+      height: 10px;
+      border-radius: 999px;
+      background: #0b1524;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      transition: width .2s linear, background .2s ease;
+    }
+
+    .mode-title {
+      color: var(--green);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+
+    .scenario {
+      background: rgba(7, 14, 24, 0.82);
+      border-left: 3px solid var(--cyan);
+      padding: 12px;
+      border-radius: 10px;
+      color: #d7e8f7;
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .question {
+      margin: 10px 0 14px;
+      font-size: 1.16rem;
+      font-weight: 550;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: .94rem;
+    }
+    th, td {
+      border: 1px solid #35506d;
+      padding: 8px 10px;
+      text-align: center;
+      background: #19283b;
+    }
+    th { background: #0f2843; color: #95e8ff; }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    button, input, select {
+      border-radius: 10px;
+      border: 1px solid #335471;
+      background: #0d1828;
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input { flex: 1; min-width: 180px; }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(180deg, #163450, #10263a);
+      transition: transform .12s ease, border-color .2s ease;
+    }
+    button:hover { border-color: var(--cyan); transform: translateY(-1px); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .btn-main { background: linear-gradient(180deg, #145449, #11392f); border-color: #2d8b76; }
+    .btn-warn { background: linear-gradient(180deg, #4c3420, #362414); border-color: #8e6034; }
+
+    .feedback {
+      display: none;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: 1px solid #3b5672;
+      padding: 12px;
+      line-height: 1.5;
+      background: #0b1a2b;
+    }
+    .feedback.good { border-color: #2f7f66; background: #0f2a22; color: #c8ffe8; }
+    .feedback.bad { border-color: #8b4560; background: #2a1320; color: #ffd9e4; }
+
+    .rule { color: var(--yellow); font-size: .88rem; margin-top: 6px; }
+
+    .panel-title { margin: 0 0 10px; color: var(--cyan); }
+
+    .chart-row { margin: 8px 0; }
+    .chart-label {
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      font-size: .9rem;
+    }
+    .track {
+      margin-top: 4px;
+      height: 12px;
+      border-radius: 999px;
+      background: #0d1725;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .bar {
+      height: 100%;
+      width: 0%;
+      transition: width .35s ease;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+    }
+
+    .list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: #bcd2e5;
+      font-size: .9rem;
+      line-height: 1.35;
+    }
+
+    .history {
+      margin-top: 12px;
+      max-height: 240px;
+      overflow: auto;
+      border-top: 1px dashed #2a4058;
+      padding-top: 8px;
+      font-size: .88rem;
+    }
+    .history-item { margin: 6px 0; color: #c8dded; }
+
+    #sdGraph {
+      width: 100%;
+      background: #0c1624;
+      border: 1px solid #2c455f;
+      border-radius: 12px;
+      margin-top: 8px;
+      aspect-ratio: 1.55;
+    }
+
+    @media (max-width: 920px) {
+      .container { grid-template-columns: 1fr; }
+      .header { grid-template-columns: 1fr; }
+      .badges { justify-content: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card header">
+      <div>
+        <h1>The Invisible Hand: Economics Master</h1>
+        <div class="subtitle">You are the Economic Consultant. Diagnose scenarios, apply Module 1–4 logic, and maximize Utility.</div>
+      </div>
+      <div class="badges">
+        <div class="badge">Utility: <strong id="score">0</strong></div>
+        <div class="badge">Streak: <strong id="streak">0</strong></div>
+        <div class="badge">Multiplier: <strong id="multiplier">x1</strong></div>
+        <div class="badge">Round: <strong id="round">1</strong></div>
+      </div>
+      <div class="timer-wrap">
+        <div class="timer-head"><span>Decision Clock</span><span id="timeText">30s</span></div>
+        <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="mode-title" id="modeName">Loading...</div>
+      <div class="scenario" id="scenario"></div>
+      <div id="dynamicArea"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="controls">
+        <button id="hintBtn" class="btn-warn">Hint (-4 Utility)</button>
+        <button id="nextBtn" class="btn-main" style="display:none">Next Scenario ▶</button>
+      </div>
+    </section>
+
+    <aside class="card">
+      <h3 class="panel-title">Progress Dashboard</h3>
+      <div id="chart"></div>
+      <ul class="list">
+        <li><b>Price change</b> causes movement along demand = <i>change in quantity demanded</i>.</li>
+        <li><b>Demand shifter</b> moves the whole curve.</li>
+        <li>PPC straight line = constant OC; bowed out = increasing marginal OC from specialized resources.</li>
+        <li>For demand price elasticity use <b>|E<sub>d</sub>|</b>; keep signs for income/cross-price elasticities.</li>
+      </ul>
+      <div class="history" id="history"></div>
+    </aside>
+  </main>
+
+  <script>
+    const state = {
+      score: 0,
+      streak: 0,
+      multiplier: 1,
+      round: 1,
+      timerMax: 30,
+      timeLeft: 30,
+      timerId: null,
+      currentHint: 'Think about the core rule for this mode.',
+      categoryStats: {
+        PPC: { correct: 0, total: 0 },
+        'S&D': { correct: 0, total: 0 },
+        Elasticity: { correct: 0, total: 0 }
+      },
+      history: [],
+      modeQueue: []
+    };
+
+    const modeName = document.getElementById('modeName');
+    const scenarioEl = document.getElementById('scenario');
+    const dynamicArea = document.getElementById('dynamicArea');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('nextBtn');
+    const hintBtn = document.getElementById('hintBtn');
+    const timerFill = document.getElementById('timerFill');
+    const timeText = document.getElementById('timeText');
+
+    const rInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function updateStats() {
+      document.getElementById('score').textContent = state.score;
+      document.getElementById('streak').textContent = state.streak;
+      document.getElementById('multiplier').textContent = `x${state.multiplier}`;
+      document.getElementById('round').textContent = state.round;
+    }
+
+    function renderChart() {
+      const chart = document.getElementById('chart');
+      chart.innerHTML = '';
+      Object.entries(state.categoryStats).forEach(([name, s]) => {
+        const pct = s.total ? Math.round((s.correct / s.total) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'chart-row';
+        row.innerHTML = `
+          <div class="chart-label"><span>${name}</span><span>${s.correct}/${s.total} (${pct}%)</span></div>
+          <div class="track"><div class="bar" style="width:${pct}%"></div></div>
+        `;
+        chart.appendChild(row);
+      });
+    }
+
+    function renderHistory() {
+      const box = document.getElementById('history');
+      box.innerHTML = '<strong style="color:#8ddfff">Consultant Log</strong>';
+      if (!state.history.length) {
+        box.innerHTML += '<div class="history-item">No rounds completed yet.</div>';
+        return;
+      }
+      state.history.slice(-7).reverse().forEach(item => {
+        const d = document.createElement('div');
+        d.className = 'history-item';
+        d.textContent = `R${item.round} · ${item.category} · ${item.correct ? '✔' : '✘'} · ${item.note}`;
+        box.appendChild(d);
+      });
+    }
+
+    function startTimer(onExpire) {
+      clearInterval(state.timerId);
+      state.timeLeft = state.timerMax;
+      timeText.textContent = `${state.timeLeft}s`;
+      timerFill.style.width = '100%';
+      timerFill.style.background = 'linear-gradient(90deg, var(--green), var(--cyan))';
+
+      state.timerId = setInterval(() => {
+        state.timeLeft -= 1;
+        const pct = (state.timeLeft / state.timerMax) * 100;
+        timerFill.style.width = `${Math.max(0, pct)}%`;
+        timeText.textContent = `${Math.max(0, state.timeLeft)}s`;
+
+        if (state.timeLeft <= 9) {
+          timerFill.style.background = 'linear-gradient(90deg, #ff9f43, var(--red))';
+        }
+        if (state.timeLeft <= 0) {
+          clearInterval(state.timerId);
+          onExpire();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(state.timerId);
+    }
+
+    function disableRoundInputs() {
+      dynamicArea.querySelectorAll('button, input, select').forEach(el => el.disabled = true);
+      hintBtn.disabled = true;
+    }
+
+    function showFeedback(ok, body, rule) {
+      feedbackEl.style.display = 'block';
+      feedbackEl.className = `feedback ${ok ? 'good' : 'bad'}`;
+      feedbackEl.innerHTML = `<strong>${ok ? 'Correct.' : 'Incorrect.'}</strong> ${body}<div class="rule">Rule: ${rule}</div>`;
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function settle(correct, category, note, rule) {
+      stopTimer();
+      state.categoryStats[category].total += 1;
+
+      if (correct) {
+        state.categoryStats[category].correct += 1;
+        state.streak += 1;
+        state.multiplier = Math.min(5, 1 + Math.floor(state.streak / 3));
+        const gain = 12 * state.multiplier;
+        state.score += gain;
+        showFeedback(true, `${note} (+${gain} Utility)`, rule);
+      } else {
+        state.streak = 0;
+        state.multiplier = 1;
+        showFeedback(false, note, rule);
+      }
+
+      state.history.push({ round: state.round, category, correct, note });
+      updateStats();
+      renderChart();
+      renderHistory();
+      disableRoundInputs();
+    }
+
+    function timeoutLoss(category) {
+      settle(false, category, 'Time expired before a decision. In real markets, delayed analysis can be costly.', 'Apply the core model quickly: identify what changes and what remains constant.');
+    }
+
+    function loadNext() {
+      state.round += 1;
+      feedbackEl.style.display = 'none';
+      feedbackEl.className = 'feedback';
+      dynamicArea.innerHTML = '';
+      nextBtn.style.display = 'none';
+      hintBtn.disabled = false;
+
+      if (!state.modeQueue.length) {
+        state.modeQueue = shuffle([buildPPCMode, buildSupplyDemandMode, buildElasticityMode]);
+      }
+      const fn = state.modeQueue.pop();
+      fn();
+      updateStats();
+    }
+
+    function beginRound(category, hintText) {
+      state.currentHint = hintText;
+      startTimer(() => timeoutLoss(category));
+    }
+
+    // Mode 1
+    function buildPPCMode() {
+      modeName.textContent = 'Mode: Opportunity Cost Calculator';
+      scenarioEl.textContent = 'Two countries allocate scarce resources between two goods. Compute marginal opportunity cost using Give Up / Get.';
+
+      const countries = shuffle(['Mexico', 'Nigeria', 'Vietnam', 'India', 'Chile', 'Kenya']);
+      const [A, B] = countries;
+      const [g1, g2] = pick([
+        ['Shoes', 'Glasses'],
+        ['Coffee', 'Tea'],
+        ['Phones', 'Textbooks'],
+        ['Corn', 'Steel']
+      ]);
+
+      const structure = pick(['constant', 'increasing']);
+      let answer, answer2, rule, explain;
+
+      if (structure === 'constant') {
+        const ax = rInt(24, 86), ay = rInt(24, 86);
+        const bx = rInt(24, 86), by = rInt(24, 86);
+        const c = Math.random() > 0.5 ? { n: A, x: ax, y: ay } : { n: B, x: bx, y: by };
+        const ask = Math.random() > 0.5 ? g1 : g2;
+
+        dynamicArea.innerHTML = `
+          <table>
+            <tr><th>Country</th><th>Max ${g1}</th><th>Max ${g2}</th></tr>
+            <tr><td>${A}</td><td>${ax}</td><td>${ay}</td></tr>
+            <tr><td>${B}</td><td>${bx}</td><td>${by}</td></tr>
+          </table>
+          <div class="question">What is OC of <b>1 ${ask}</b> in <b>${c.n}</b>?</div>
+          <div class="controls">
+            <input type="number" id="ppcNum" step="0.01" placeholder="Numeric opportunity cost" />
+            <select id="ppcType">
+              <option value="">Cost Structure?</option>
+              <option value="constant">Constant Costs</option>
+              <option value="increasing">Increasing Costs</option>
+            </select>
+            <button id="ppcSubmit">Submit</button>
+          </div>`;
+
+        answer = ask === g1 ? c.y / c.x : c.x / c.y;
+        answer2 = 'constant';
+        explain = `Linear tradeoff means constant OC. Correct value is ${answer.toFixed(2)}.`;
+        rule = 'Straight-line PPC => constant marginal opportunity cost at all points.';
+      } else {
+        const x1 = rInt(18, 34), x2 = rInt(42, 66);
+        const y0 = rInt(72, 100), y1 = y0 - rInt(10, 16), y2 = y1 - rInt(16, 26);
+        const z1 = rInt(16, 30), z2 = rInt(38, 60);
+        const w0 = rInt(68, 95), w1 = w0 - rInt(9, 15), w2 = w1 - rInt(14, 24);
+
+        const useA = Math.random() > 0.5;
+        const c = useA ? { n: A, x1, x2, y1, y2 } : { n: B, x1: z1, x2: z2, y1: w1, y2: w2 };
+        const dx = c.x2 - c.x1;
+        const dy = c.y1 - c.y2;
+
+        dynamicArea.innerHTML = `
+          <table>
+            <tr><th colspan="4">${A} PPC (${g1}, ${g2})</th></tr>
+            <tr><th>Point</th><th>A</th><th>B</th><th>C</th></tr>
+            <tr><td>${g1}</td><td>0</td><td>${x1}</td><td>${x2}</td></tr>
+            <tr><td>${g2}</td><td>${y0}</td><td>${y1}</td><td>${y2}</td></tr>
+          </table>
+          <table>
+            <tr><th colspan="4">${B} PPC (${g1}, ${g2})</th></tr>
+            <tr><th>Point</th><th>A</th><th>B</th><th>C</th></tr>
+            <tr><td>${g1}</td><td>0</td><td>${z1}</td><td>${z2}</td></tr>
+            <tr><td>${g2}</td><td>${w0}</td><td>${w1}</td><td>${w2}</td></tr>
+          </table>
+          <div class="question">For <b>${c.n}</b>, moving B → C, what is OC of 1 additional <b>${g1}</b> (in ${g2})?</div>
+          <div class="controls">
+            <input type="number" id="ppcNum" step="0.01" placeholder="Numeric opportunity cost" />
+            <select id="ppcType">
+              <option value="">Cost Structure?</option>
+              <option value="constant">Constant Costs</option>
+              <option value="increasing">Increasing Costs</option>
+            </select>
+            <button id="ppcSubmit">Submit</button>
+          </div>`;
+
+        answer = dy / dx;
+        answer2 = 'increasing';
+        explain = `B→C gives up ${dy} ${g2} for ${dx} ${g1}; OC = ${answer.toFixed(2)} and rises as specialized resources are reallocated.`;
+        rule = 'Bowed-out PPC reflects increasing marginal OC from specialized resources.';
+      }
+
+      document.getElementById('ppcSubmit').onclick = () => {
+        const val = parseFloat(document.getElementById('ppcNum').value);
+        const t = document.getElementById('ppcType').value;
+        if (Number.isNaN(val) || !t) return;
+        const ok = Math.abs(val - answer) <= 0.1 && t === answer2;
+        settle(ok, 'PPC', ok ? explain : `${explain} You entered ${Number.isNaN(val) ? 'N/A' : val.toFixed(2)} and chose ${t}.`, rule);
+      };
+
+      beginRound('PPC', 'Use Give Up / Get for the relevant segment. Then classify PPC shape: straight = constant, bowed out = increasing.');
+    }
+
+    // Mode 2
+    function buildSupplyDemandMode() {
+      modeName.textContent = 'Mode: Market Shifter (Supply & Demand)';
+      const events = [
+        {
+          text: 'A precision-farming AI lowers corn production costs nationwide.',
+          correct: 'SR',
+          why: 'Lower costs increase quantity supplied at every price.',
+          rule: 'Technology and input productivity shift Supply Right.'
+        },
+        {
+          text: 'Consumer income rises, and ramen is an inferior good.',
+          correct: 'DL',
+          why: 'Higher income reduces demand for inferior goods.',
+          rule: 'Income is a demand shifter; inferior goods move opposite income.'
+        },
+        {
+          text: 'A social media trend increases preference for electric scooters.',
+          correct: 'DR',
+          why: 'A taste increase raises demand at every price.',
+          rule: 'Preference changes shift Demand, not quantity demanded.'
+        },
+        {
+          text: 'A new emissions tax raises producer compliance costs.',
+          correct: 'SL',
+          why: 'Higher production costs reduce supply at each price.',
+          rule: 'Input/regulatory cost increases shift Supply Left.'
+        }
+      ];
+
+      const e = pick(events);
+      scenarioEl.innerHTML = `<b>Event:</b> ${e.text}`;
+
+      dynamicArea.innerHTML = `
+        <svg id="sdGraph" viewBox="0 0 360 230" aria-label="Supply and Demand graph">
+          <line x1="46" y1="16" x2="46" y2="198" stroke="#99bdd6" stroke-width="2"/>
+          <line x1="34" y1="188" x2="334" y2="188" stroke="#99bdd6" stroke-width="2"/>
+          <text x="14" y="24" fill="#9ab4c7" font-size="11">P</text>
+          <text x="336" y="207" fill="#9ab4c7" font-size="11">Q</text>
+          <line id="d0" x1="70" y1="46" x2="290" y2="177" stroke="#3ad8ff" stroke-width="3"/>
+          <line id="s0" x1="80" y1="177" x2="280" y2="46" stroke="#19f0a8" stroke-width="3"/>
+          <text x="66" y="42" fill="#3ad8ff" font-size="11">D</text>
+          <text x="282" y="42" fill="#19f0a8" font-size="11">S</text>
+        </svg>
+        <div class="question">Choose the correct market shift.</div>
+        <div class="controls">
+          <button data-c="DL">Demand Shift Left</button>
+          <button data-c="DR">Demand Shift Right</button>
+          <button data-c="SL">Supply Shift Left</button>
+          <button data-c="SR">Supply Shift Right</button>
+        </div>
+        <div class="controls" style="margin-top:10px">
+          <label style="display:flex;align-items:center;gap:6px;color:var(--muted)">
+            <input type="checkbox" id="priceMoveCheck" style="accent-color:#19f0a8"/>
+            Is this merely a price-change movement along an existing demand curve?
+          </label>
+        </div>`;
+
+      dynamicArea.querySelectorAll('[data-c]').forEach(btn => {
+        btn.onclick = () => {
+          const choice = btn.getAttribute('data-c');
+          const curveOk = choice === e.correct;
+          const moveChecked = document.getElementById('priceMoveCheck').checked;
+          const moveOk = moveChecked === false;
+          const ok = curveOk && moveOk;
+
+          if (curveOk) animateShift(e.correct);
+          const extra = moveChecked ? 'You marked it as only a price movement, but this event is a true shifter.' : 'Good call not confusing shift with movement along curve.';
+          settle(ok, 'S&D', ok ? `${e.why} ${extra}` : `Selected ${btn.textContent}. ${e.why} ${extra}`, `${e.rule} Price changes alone cause movement along a curve (change in quantity demanded), not a demand shift.`);
+        };
+      });
+
+      beginRound('S&D', 'First identify whether the event changes preferences/income/costs (a shifter). Then avoid mixing that up with simple price movement.');
+    }
+
+    function animateShift(code) {
+      const d = document.getElementById('d0');
+      const s = document.getElementById('s0');
+      const map = {
+        DL: { target: d, dx: -24 },
+        DR: { target: d, dx: 24 },
+        SL: { target: s, dx: -24 },
+        SR: { target: s, dx: 24 }
+      };
+      const sh = map[code];
+      if (!sh || !sh.target) return;
+
+      let f = 0;
+      const total = 20;
+      const x1 = +sh.target.getAttribute('x1');
+      const x2 = +sh.target.getAttribute('x2');
+      const step = sh.dx / total;
+      const id = setInterval(() => {
+        f++;
+        sh.target.setAttribute('x1', (x1 + step * f).toFixed(2));
+        sh.target.setAttribute('x2', (x2 + step * f).toFixed(2));
+        if (f >= total) clearInterval(id);
+      }, 16);
+    }
+
+    // Mode 3
+    function buildElasticityMode() {
+      modeName.textContent = 'Mode: Elasticity Executive';
+      const product = pick(['pizza', 'coffee drinks', 'campus shuttle passes', 'movie tickets']);
+      const ed = pick([0.4, 0.6, 0.8, 1.2, 1.6, 2.1]);
+      const type = ed < 1 ? 'inelastic' : 'elastic';
+      const goal = pick(['increase', 'decrease']);
+
+      const ie = pick([-1.2, -0.5, 0.7, 1.3]);
+
+      scenarioEl.innerHTML = `You manage <b>${product}</b>. Demand has <b>|E<sub>d</sub>| = ${ed}</b> (${type}). You want to <b>${goal}</b> total revenue.`;
+      dynamicArea.innerHTML = `
+        <div class="question">Revenue decision: Raise price or Lower price?</div>
+        <div class="controls">
+          <button id="raiseBtn">Raise Price</button>
+          <button id="lowerBtn">Lower Price</button>
+        </div>
+        <div class="question" style="font-size:1rem;margin-top:16px">Bonus concept check: Income elasticity for the good is <b>${ie}</b>. Is it normal or inferior?</div>
+        <div class="controls">
+          <button id="normalBtn">Normal</button>
+          <button id="inferiorBtn">Inferior</button>
+        </div>`;
+
+      const revenueAnswer = ed < 1 ? (goal === 'increase' ? 'Raise' : 'Lower') : (goal === 'increase' ? 'Lower' : 'Raise');
+      const incomeAnswer = ie < 0 ? 'Inferior' : 'Normal';
+
+      let revenueChoice = null;
+      let incomeChoice = null;
+
+      function maybeGrade() {
+        if (!revenueChoice || !incomeChoice) return;
+        const okRev = revenueChoice === revenueAnswer;
+        const okInc = incomeChoice === incomeAnswer;
+        const allOk = okRev && okInc;
+        const note = `TR test: with |Ed|=${ed}, price and TR move ${ed < 1 ? 'in the same direction' : 'in opposite directions'}. Income elasticity sign says this good is ${incomeAnswer.toLowerCase()}.`;
+        settle(allOk, 'Elasticity', allOk ? note : `${note} You chose ${revenueChoice} price and ${incomeChoice}.`, 'Use absolute value for price elasticity (|Ed|). Keep signs for income elasticity: negative = inferior, positive = normal.');
+      }
+
+      document.getElementById('raiseBtn').onclick = () => { revenueChoice = 'Raise'; maybeGrade(); };
+      document.getElementById('lowerBtn').onclick = () => { revenueChoice = 'Lower'; maybeGrade(); };
+      document.getElementById('normalBtn').onclick = () => { incomeChoice = 'Normal'; maybeGrade(); };
+      document.getElementById('inferiorBtn').onclick = () => { incomeChoice = 'Inferior'; maybeGrade(); };
+
+      beginRound('Elasticity', 'For TR: inelastic => same direction as price, elastic => opposite. For income elasticity, sign determines normal/inferior.');
+    }
+
+    hintBtn.onclick = () => {
+      state.score = Math.max(0, state.score - 4);
+      updateStats();
+      hintBtn.disabled = true;
+      feedbackEl.style.display = 'block';
+      feedbackEl.className = 'feedback';
+      feedbackEl.innerHTML = `<strong>Hint:</strong> ${state.currentHint}<div class="rule">Cost: -4 Utility (consulting fee).</div>`;
+    };
+
+    nextBtn.onclick = loadNext;
+
+    // boot
+    renderChart();
+    renderHistory();
+    updateStats();
+    if (!state.modeQueue.length) state.modeQueue = shuffle([buildPPCMode, buildSupplyDemandMode, buildElasticityMode]);
+    state.round = 1;
+    state.modeQueue.pop()();
+  </script>
+</body>
+</html>
